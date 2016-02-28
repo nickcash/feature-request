@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feature Requests</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="feature_request.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Feature Requests</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar">
+                <h3>Clients:</h3>
+                <ul class="nav nav-sidebar" data-bind="foreach: clients">
+                    <li data-bind="css: {'selected': _id == $root.activeClient()._id}">
+                        <a href="#" data-bind="text: name, click: selectClient"></a>
+                        <span data-bind="_id == $root.activeClient()._id"></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-9 col-md-offset-2 main">
+                <button id="new-request-button" type="button" class="btn btn-lg btn-success" data-bind="click: newFeatureRequest">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    New Feature Request
+                </button>
+                <div id="list-container" data-bind="with: activeClient">
+                    <h2 class="sub-header"><span data-bind="text: name"></span> Requests:</h2>
+                    <div class="alert alert-warning" role="alert" data-bind="visible: !$root.clientRequests().length">
+                        Client has no feature requests.
+                    </div>
+                    <ul class="list-group" data-bind="foreach: $root.clientRequests">
+
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">
+                                <span data-bind="text: title, visible: !_editing()"></span>
+                                <input type="text" data-bind="value: title, visible: _editing, koFocus: _editing" />
+                            </h4>
+                            <p class="list-group-item-text">
+                                <div>
+                                    <strong>Priority:</strong>
+                                    <span data-bind="text: client_priority"></span>
+                                </div>
+                                <div>
+                                    <strong>Target Date:</strong>
+                                    <span data-bind="text: target_date, visible: !_editing()"></span>
+                                    <input type="text" data-bind="value: target_date, visible: _editing" />
+                                </div>
+                                <div>
+                                    <strong>Ticket URL:</strong>
+                                    <a data-bind="text: ticket_url, attr: {href: ticket_url}, visible: !_editing()"></a>
+                                    <input type="text" data-bind="value: ticket_url, visible: _editing" />
+                                </div`>
+                                <div>
+                                    <strong>Product Area:</strong>
+                                    <span data-bind="text: _product_area_name, visible: !_editing()"></span>
+                                    <select data-bind="options: $root.productAreas, optionsText: 'name', optionsValue: '_id', value: product_area_id, visible: _editing"></select>
+                                </div>
+                                <p class="feature-request-description">
+                                    <span  data-bind="text: description, visible: !_editing()"></span>
+                                    <textarea class="feature-request-description-textarea" data-bind="value: description, visible: _editing"></textarea>
+                                </p>
+
+                                <div>
+                                    <button type="button" class="btn btn-info" data-bind="visible: !_editing(), click: startEditing">
+                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                        Edit
+                                    </button>
+                                    <button type="button" class="btn btn-success" data-bind="visible: _editing, click: saveChanges">
+                                        <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+                                        Save
+                                    </button>
+
+                                    <button type="button" class="btn btn-default" title="Move Up" data-bind="disable: client_priority() == 1, click: moveUp">
+                                        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="Move Down" data-bind="disable: client_priority() == $root.clientRequests().length, click: moveDown">
+                                        <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+                                    </button>
+                                   <button type="button" class="btn btn-danger" data-bind="click: deleteRequest">
+                                        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                                        Delete
+                                    </button>
+                                </div>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- Knockout -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+
+    <script src="feature_request.js"></script>
+
+</body>
+</html>
