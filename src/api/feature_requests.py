@@ -33,13 +33,15 @@ def create_feature_request(*, data):
     }
 
     mock_data.feature_requests.append(new_feature_request)
+    return new_feature_request
 
 
 @crud.retrieve("feature_requests")
 def retrieve_feature_requests():
     """Retrieves all feature requests"""
 
-    return mock_data.get_all(mock_data.feature_requests)
+    return sorted(mock_data.get_all(mock_data.feature_requests),
+                  key=lambda request: request["client_priority"])
 
 
 @crud.retrieve("feature_requests")
@@ -68,6 +70,7 @@ def update_feature_request(_id, *, data):
     request = mock_data.get_one(mock_data.feature_requests,
                                 _id=_id)
     request.update(**data)
+    return request
 
 
 @crud.delete("feature_requests")
