@@ -55,7 +55,7 @@ def retrieve_feature_requests_for_client(client_id: int):
 
 
 @crud.update("feature_requests")
-def update_feature_request(_id: int, *, data):
+def update_feature_request(_id, *, data):
     """Updates a single feature request.
 
     Args:
@@ -71,7 +71,7 @@ def update_feature_request(_id: int, *, data):
 
 
 @crud.delete("feature_requests")
-def delete_feature_request(_id: int):
+def delete_feature_request(_id):
     """Deletes a single feature request.
 
     Args:

@@ -14,7 +14,7 @@ def get_one(data, **kargs):
 
 feature_requests = [
     {
-        "_id": 1,
+        "_id": "0f215adcde5011e5a0c628b2bd66afe9",
         "title": "Request A.1",
         "description": "A request",
         "client_id": 1,
@@ -24,7 +24,7 @@ feature_requests = [
         "product_area_id": 1,
     },
     {
-        "_id": 2,
+        "_id": "0ffa1296de5011e5a0c628b2bd66afe9",
         "title": "Request A.2",
         "description": "Another request",
         "client_id": 1,
@@ -34,7 +34,7 @@ feature_requests = [
         "product_area_id": 2,
     },
     {
-        "_id": 3,
+        "_id": "10555908de5011e5a0c628b2bd66afe9",
         "title": "Request B.1",
         "description": "A request from another client",
         "client_id": 2,
