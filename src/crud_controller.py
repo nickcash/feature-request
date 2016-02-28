@@ -127,7 +127,7 @@ class _CRUDController():
         else:
             response = function(*args)
 
-        return json.dumps(response or {"status": "OK"})
+        return json.dumps(response if response is not None else {"status": "OK"})
 
 
 class CRUDException(Exception):
