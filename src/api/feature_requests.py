@@ -52,8 +52,9 @@ def retrieve_feature_requests_for_client(client_id: int):
         client_id: The ID of the client
     """
 
-    return mock_data.get_all(mock_data.feature_requests,
-                             client_id=client_id)
+    return sorted(mock_data.get_all(mock_data.feature_requests,
+                                    client_id=client_id),
+                  key=lambda request: request["client_priority"])
 
 
 @crud.update("feature_requests")
