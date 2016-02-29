@@ -47,59 +47,60 @@
                     </div>
                     <ul class="list-group" data-bind="foreach: $root.clientRequests">
 
-                        <li class="list-group-item">
+                        <li class="list-group-item"><form role="form" data-bind="submit: saveChanges">
                             <h4 class="list-group-item-heading">
                                 <span data-bind="text: title, visible: !_editing()"></span>
-                                <input type="text" data-bind="value: title, visible: _editing, koFocus: _editing" />
+                                <label data-bind="visible:_editing">Title</label>
+                                <input type="text" class="form-control feature-request-title-input" data-bind="value: title, visible: _editing, koFocus: _editing" required />
                             </h4>
                             <p class="list-group-item-text">
                                 <div>
-                                    <strong>Priority:</strong>
+                                    <label>Priority:</label>
                                     <span data-bind="text: client_priority"></span>
                                 </div>
                                 <div>
-                                    <strong>Target Date:</strong>
+                                    <label>Target Date:</label>
                                     <span data-bind="text: target_date, visible: !_editing()"></span>
-                                    <input type="text" data-bind="value: target_date, visible: _editing" />
+                                    <input type="text" class="form-control" data-bind="value: target_date, visible: _editing" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" title="YYYY-mm-dd" required />
                                 </div>
                                 <div>
-                                    <strong>Ticket URL:</strong>
+                                    <label>Ticket URL:</label>
                                     <a data-bind="text: ticket_url, attr: {href: ticket_url}, visible: !_editing()"></a>
-                                    <input type="text" data-bind="value: ticket_url, visible: _editing" />
-                                </div`>
+                                    <input type="text" class="form-control" data-bind="value: ticket_url, visible: _editing" pattern="http(s)?://.*\..*" title="URL" />
+                                </div>
                                 <div>
-                                    <strong>Product Area:</strong>
+                                    <label>Product Area:</label>
                                     <span data-bind="text: _product_area_name, visible: !_editing()"></span>
-                                    <select data-bind="options: $root.productAreas, optionsText: 'name', optionsValue: '_id', value: product_area_id, visible: _editing"></select>
+                                    <select class="form-control" data-bind="options: $root.productAreas, optionsText: 'name', optionsValue: '_id', value: product_area_id, visible: _editing"></select>
                                 </div>
                                 <p class="feature-request-description">
                                     <span  data-bind="text: description, visible: !_editing()"></span>
-                                    <textarea class="feature-request-description-textarea" data-bind="value: description, visible: _editing"></textarea>
+                                    <textarea class="form-control feature-request-description-textarea" data-bind="value: description, visible: _editing" required></textarea>
                                 </p>
-
-                                <div>
-                                    <button type="button" class="btn btn-info" data-bind="visible: !_editing(), click: startEditing">
-                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-                                        Edit
-                                    </button>
-                                    <button type="button" class="btn btn-success" data-bind="visible: _editing, click: saveChanges">
-                                        <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
-                                        Save
-                                    </button>
-
-                                    <button type="button" class="btn btn-default" title="Move Up" data-bind="disable: client_priority() == 1, click: moveUp">
-                                        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-default" title="Move Down" data-bind="disable: client_priority() == $root.clientRequests().length, click: moveDown">
-                                        <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
-                                    </button>
-                                   <button type="button" class="btn btn-danger" data-bind="click: deleteRequest">
-                                        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
-                                        Delete
-                                    </button>
-                                </div>
                             </p>
-                        </li>
+
+                            <div>
+                                <button type="button" class="btn btn-info" data-bind="visible: !_editing(), click: startEditing">
+                                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                    Edit
+                                </button>
+                                <button type="submit" class="btn btn-success" data-bind="visible: _editing">
+                                    <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+                                    Save
+                                </button>
+
+                                <button type="button" class="btn btn-default" title="Move Up" data-bind="disable: client_priority() == 1, click: moveUp">
+                                    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default" title="Move Down" data-bind="disable: client_priority() == $root.clientRequests().length, click: moveDown">
+                                    <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+                                </button>
+                               <button type="button" class="btn btn-danger" data-bind="click: deleteRequest">
+                                    <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                                    Delete
+                                </button>
+                            </div>
+                        </form></li>
                     </ul>
                 </div>
             </div>
