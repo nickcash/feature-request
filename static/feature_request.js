@@ -52,6 +52,7 @@ var FeatureRequest = function(request, index) {
 
         this._editing(false);
         this.save();
+        this._product_area_name(viewModel.productAreaMap[this.product_area_id()].name);
     };
 
     this.updatePriority = function(priority) {
@@ -146,7 +147,8 @@ var FeatureRequest = function(request, index) {
         this[key] = ko.observable(request[key]);
     }
     this._editing = ko.observable(false);
-    this._product_area_name = viewModel.productAreaMap[this.product_area_id()].name;
+    this._product_area_name = ko.observable(
+        viewModel.productAreaMap[this.product_area_id()].name);
 };
 
 
