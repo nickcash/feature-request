@@ -14,12 +14,16 @@ def app(environ, start_response):
     method = environ["REQUEST_METHOD"].upper()
     path = environ["PATH_INFO"]
 
-    if "CONTENT-TYPE" in environ:
-        content_type, options = cgi.parse_header(environ["CONTENT-TYPE"])
-        content_encoding = options.get("charset", "iso-8859-1")
+    content_length = int(environ.get('CONTENT_LENGTH') or 0)
+    if content_length:
+        if "CONTENT-TYPE" in environ:
+            content_type, options = cgi.parse_header(environ["CONTENT-TYPE"])
+            content_encoding = options.get("charset", "iso-8859-1")
+        else:
+            content_encoding = "iso-8859-1"
+        data = environ["wsgi.input"].read(content_length).decode(content_encoding)
     else:
-        content_encoding = "iso-8859-1"
-    data = environ["wsgi.input"].read().decode(content_encoding)
+        data = None
 
     try:
         response = crud.handle(method, path, data)
