@@ -1,0 +1,19 @@
+language: python
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+
+services:
+  - "postgresql"
+
+install:
+  - "pip install -r requirements.txt"
+
+before_script:
+  - "cp config/config.travis.cfg config/config.cfg"
+  - "psql -c 'CREATE DATABASE travis_ci_test;' -U postgres"
+
+script:
+  - "cd src"
+  - "python unit_tests.py"
