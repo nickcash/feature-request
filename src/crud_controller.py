@@ -145,6 +145,9 @@ class CRUDException(Exception):
         self.status = status
         self.message = message
 
+    def __str__(self):
+        return self.status
+
 
 # Singleton _CRUDController
 crud = _CRUDController()
