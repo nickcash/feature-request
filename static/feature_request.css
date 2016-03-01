@@ -14,7 +14,7 @@
     border: 1px solid #ddd;
 }
 
-.main {
+#main {
     /* Spacing for navbar */
     padding-top: 50px;
     /* Spacing for feature request button */

@@ -163,6 +163,7 @@ var selectClient = function(client, event) {
                 new FeatureRequest(request, i)
             );
         });
+        $("#main").show();
     });
 };
 
