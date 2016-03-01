@@ -3,7 +3,7 @@
 import uuid
 
 from crud_controller import crud
-import mock_data
+import database
 
 
 @crud.create("feature_requests")
@@ -11,7 +11,7 @@ def create_feature_request(*, data):
     """Creates a new feature_request.
 
     Args:
-        data: Must be a JSON object with the following keys:
+        data: Must be a dict with the following keys:
             title: A short, descriptive name
             description: A long description
             client_id: The ID of the client
@@ -21,27 +21,35 @@ def create_feature_request(*, data):
             product_area_id: The ID of the product area
     """
 
-    new_feature_request = {
-        "_id": uuid.uuid1().hex,
-        "title": data["title"],
-        "description": data["description"],
-        "client_id": data["client_id"],
-        "client_priority": data["client_priority"],
-        "target_date": data["target_date"],
-        "ticket_url": data.get("ticket_url"),
-        "product_area_id": data["product_area_id"],
-    }
+    data["_id"] = str(uuid.uuid1())
+    with database.connection.cursor() as cursor:
+        cursor.execute("""INSERT INTO feature_request.feature_requests
+                              (_id, title, description, client_id,
+                               client_priority, target_date,
+                               ticket_url, product_area_id)
 
-    mock_data.feature_requests.append(new_feature_request)
-    return new_feature_request
+                          VALUES(%(_id)s, %(title)s, %(description)s, %(client_id)s,
+                                 %(client_priority)s, %(target_date)s,
+                                 %(ticket_url)s, %(product_area_id)s)
+                       """,
+                       data)
+
+    return data
 
 
 @crud.retrieve("feature_requests")
 def retrieve_feature_requests():
     """Retrieves all feature requests"""
 
-    return sorted(mock_data.get_all(mock_data.feature_requests),
-                  key=lambda request: request["client_priority"])
+    with database.connection.cursor() as cursor:
+        cursor.execute("""SELECT _id::text, title, description, client_id,
+                              client_priority, target_date::text,
+                              ticket_url, product_area_id
+                          FROM feature_request.feature_requests
+                          ORDER BY client_id, client_priority
+                       """)
+
+        return cursor.fetchall()
 
 
 @crud.retrieve("feature_requests")
@@ -52,9 +60,17 @@ def retrieve_feature_requests_for_client(client_id: int):
         client_id: The ID of the client
     """
 
-    return sorted(mock_data.get_all(mock_data.feature_requests,
-                                    client_id=client_id),
-                  key=lambda request: request["client_priority"])
+    with database.connection.cursor() as cursor:
+        cursor.execute("""SELECT _id::text, title, description, client_id,
+                              client_priority, target_date::text,
+                              ticket_url, product_area_id
+                          FROM feature_request.feature_requests
+                          WHERE client_id = %s
+                          ORDER BY client_priority
+                       """,
+                       (client_id,))
+
+        return cursor.fetchall()
 
 
 @crud.update("feature_requests")
@@ -63,15 +79,45 @@ def update_feature_request(_id, *, data):
 
     Args:
         _id: The ID of the feature request to update.
-        data: A JSON object, the values of which will be used to update the
-            feature request's values. Values that haven't changed need not be
-            present.
+        data: A dict, the values of which will be used to update the
+            feature request's values.
     """
 
-    request = mock_data.get_one(mock_data.feature_requests,
-                                _id=_id)
-    request.update(**data)
-    return request
+    data["_id"] = _id
+    with database.connection.cursor() as cursor:
+        cursor.execute("""UPDATE feature_request.feature_requests
+                          SET title = %(title)s,
+                              description = %(description)s,
+                              client_id = %(client_id)s,
+                              client_priority = %(client_priority)s,
+                              target_date = %(target_date)s,
+                              ticket_url = %(ticket_url)s,
+                              product_area_id = %(product_area_id)s
+                          WHERE _id = %(_id)s
+                       """,
+                       data)
+
+    return data
+
+
+@crud.update("feature_requests_priority")
+def update_feature_request_priority(_id, *, data):
+    """Updates the priority of a single feature request.
+
+    Args:
+        _id: The ID of the feature request to update.
+        data: A dict containing the key 'client_priority'
+    """
+
+    data["_id"] = _id
+    with database.connection.cursor() as cursor:
+        cursor.execute("""UPDATE feature_request.feature_requests
+                          SET client_priority = %(client_priority)s
+                          WHERE _id = %(_id)s
+                       """,
+                       data)
+
+    return data
 
 
 @crud.delete("feature_requests")
@@ -82,6 +128,9 @@ def delete_feature_request(_id):
         _id: The ID of the feature request to delete.
     """
 
-    request = mock_data.get_one(mock_data.feature_requests,
-                                _id=_id)
-    mock_data.feature_requests.remove(request)
+    with database.connection.cursor() as cursor:
+        cursor.execute("""DELETE
+                          FROM feature_request.feature_requests
+                          WHERE _id = %s
+                       """,
+                       (_id,))

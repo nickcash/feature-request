@@ -1,14 +1,19 @@
 """CRUD API for managing clients."""
 
 from crud_controller import crud
-import mock_data
+import database
 
 
 @crud.retrieve("clients")
 def retrieve_clients():
     """Retrieves all clients."""
 
-    return mock_data.get_all(mock_data.clients)
+    with database.connection.cursor() as cursor:
+        cursor.execute("""SELECT _id, name
+                          FROM feature_request.clients
+                          ORDER BY _id
+                       """)
+        return cursor.fetchall()
 
 
 @crud.retrieve("clients")
@@ -19,5 +24,10 @@ def retrieve_client(_id: int):
         _id: The ID of the client to retrieve.
     """
 
-    return mock_data.get_one(mock_data.clients,
-                             _id=_id)
+    with database.connection.cursor() as cursor:
+        cursor.execute("""SELECT _id, name
+                          FROM feature_request.clients
+                          WHERE _id = %s
+                       """,
+                       (id,))
+        return cursor.fetchone()

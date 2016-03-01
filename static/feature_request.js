@@ -62,7 +62,7 @@ var FeatureRequest = function(request, index) {
         if (this._id()) {
             $.ajax({
                 type: "PUT",
-                url: "/api/feature_requests/" + this._id(),
+                url: "/api/feature_requests_priority/" + this._id(),
                 data: ko.toJSON({
                     _id: this._id(),
                     client_priority: priority

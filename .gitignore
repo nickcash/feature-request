@@ -4,3 +4,6 @@
 
 # Virtual Environment
 env/*
+
+# Secure files
+config.cfg
