@@ -25,7 +25,7 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2 sidebar">
+            <div class="col-xs-3 col-md-2 sidebar">
                 <h3>Clients:</h3>
                 <ul class="nav nav-sidebar" data-bind="foreach: clients">
                     <li data-bind="css: {'selected': _id == $root.activeClient()._id}">
@@ -35,7 +35,7 @@
                 </ul>
             </div>
 
-            <div id="main" class="col-md-9 col-md-offset-2" style="display:none">
+            <div id="main" class="col-xs-9 col-xs-offset-3 col-md-offset-2" style="display:none">
                 <button id="new-request-button" type="button" class="btn btn-lg btn-success" data-bind="click: newFeatureRequest">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     New Feature Request
