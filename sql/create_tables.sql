@@ -1,5 +1,4 @@
-CREATE SCHEMA feature_request
-  AUTHORIZATION feature_request;
+CREATE SCHEMA feature_request;
 
 
 CREATE TABLE feature_request.clients
@@ -46,6 +45,7 @@ CREATE TABLE feature_request.users
    administrator boolean NOT NULL DEFAULT false,
    PRIMARY KEY (username)
 );
+
 
 CREATE TABLE feature_request.sessions
 (
