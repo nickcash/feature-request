@@ -139,7 +139,7 @@ class TestAuthn(unittest.TestCase):
 
     def test_generate_token(self):
         token = authentication.generate_token(self.TOKEN_SIZE)
-        self.assertTrue(len(base64.b64decode(token)) == self.TOKEN_SIZE)
+        self.assertTrue(len(base64.urlsafe_b64decode(token)) == self.TOKEN_SIZE)
 
     def test_get_user_for_login(self):
         user = authentication.get_user_for_login(self.USERNAME, self.PASSWORD)

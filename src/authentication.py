@@ -45,10 +45,10 @@ def generate_token(size=DEFAULT_TOKEN_SIZE):
         size (optional): Number of bytes of randomness to use.
 
     Returns:
-        The token, as a base64-encoded string.
+        The token, as a URL-safe base64-encoded string.
     """
 
-    return base64.b64encode(os.urandom(size)).decode("ascii")
+    return base64.urlsafe_b64encode(os.urandom(size)).decode("ascii")
 
 
 def get_user_for_login(username, password):
