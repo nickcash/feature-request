@@ -15,9 +15,9 @@ connection = psycopg2.connect(
     user=config.get("database", "username"),
     password=config.get("database", "password"),
 
-    #Return results as dict
+    # Return results as dict
     cursor_factory=psycopg2.extras.RealDictCursor,
 )
 
-#No need for transactions in this app
+# No need for transactions in this app
 connection.set_session(autocommit=True)

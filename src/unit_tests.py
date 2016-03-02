@@ -129,7 +129,7 @@ class TestServer(unittest.TestCase):
         server_thread = ServerThread()
         server_thread.daemon = True
         server_thread.start()
-        time.sleep(1) # give time for server to startup
+        time.sleep(1)  # give time for server to startup
 
     def test_404(self):
         with self.assertRaisesRegex(requests.exceptions.HTTPError, "404 .*"):
@@ -141,7 +141,7 @@ class TestServer(unittest.TestCase):
             response = requests.request("BORK", "http://localhost:8000/bork")
             response.raise_for_status()
 
-    #These tests must be run in order:
+    # These tests must be run in order:
     def test_1_create(self):
         created_foo = requests.post("http://localhost:8000/foo",
                                     data=json.dumps(self.FOO)).json()
