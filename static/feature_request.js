@@ -17,6 +17,9 @@ var ViewModel = function() {
     this.ajaxError = ko.observable();
 
     this.login = function() {
+        // Post the login form the the login API endpoint
+        // if valid, set the user session cookie
+
         $.ajax({
             method: "POST",
             url: "/api/login",
@@ -45,6 +48,9 @@ var ViewModel = function() {
     };
 
     this.logout = function() {
+        // Call the logout API endpoint and reload the page to reset
+        // any data loaded
+
         $.ajax({
             method: "POST",
             url: "/api/logout",
@@ -57,7 +63,7 @@ var ViewModel = function() {
     };
 
     this.loadData = function() {
-       //Load all product areas
+        // Load all product areas
         $.ajax({
             url: "/api/product_areas",
             success: function(data) {
@@ -125,6 +131,9 @@ var viewModel = new ViewModel();
  * Global error handler
  */
 var displayAJAXErrors  =function(jqXHR, status, error) {
+    // Display error message if AJAX call returned one,
+    // otherwise display generic message.
+
     $("#main").show();
     if(jqXHR.responseJSON && jqXHR.responseJSON["message"]) {
         viewModel.ajaxError(jqXHR.responseJSON["message"]);
