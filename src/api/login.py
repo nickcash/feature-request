@@ -24,3 +24,10 @@ def logout(*, user):
     """Removes user's session."""
 
     authentication.destroy_session_for_user(user["username"])
+
+
+@crud.retrieve("check_session")
+def check_session(*, user):
+    if not user:
+        raise authentication.AuthenticationException(
+                  "Invalid session.")
