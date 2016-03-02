@@ -10,3 +10,15 @@ INSERT INTO feature_request.product_areas
            (2, 'Billing'),
            (3, 'Claims'),
            (4, 'Reports');
+
+INSERT INTO feature_request.users
+    (username, full_name, password_hash, administrator)
+    VALUES ('admin', 'Administrator User',
+            --hash of "admin_pass"
+            '$2b$12$AWkDb2vMQz1v0OdUsKKF1eyjHsuAxnvVLdGgLrOF13XBroDF58G6q',
+            true),
+
+           ('user', 'Regular User',
+            --hash of "user_pass"
+            '$2b$12$Bs3dlx9m9HuHhXt8wxe/l.HCliO/5T2Pe3Fd3dOTWswBuZMLCgHKu',
+            false);

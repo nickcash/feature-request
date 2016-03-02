@@ -10,6 +10,8 @@ Attributes:
 import inspect
 import json
 
+import authentication
+
 
 class _CRUDController():
     """Dispatches HTTP requests to defined CRUD actions.
@@ -21,8 +23,10 @@ class _CRUDController():
         the number of path segments in the URL it expects. Args may be
         annotated with a type they'll automatically be coerced to.
 
-        create and update also require a keyword-only argument called 'data'
-        which is the JSON document they'll use to create or replace a resource.
+        Functions may also have certain keyword-only arguments:
+            data: the decoded JSON document it'll use to create or replace
+                a reasource.
+            user: the currently authenticated user (or None)
 
     Examples:
         @crud.create("foo")
@@ -50,7 +54,7 @@ class _CRUDController():
             "DELETE": {}
         }
 
-    def _register(self, method, endpoint):
+    def _register(self, method, endpoint, requires_authn):
         """Registers a CRUD function.
 
         Creates a decorator to register a function with a given
@@ -59,6 +63,8 @@ class _CRUDController():
         Args:
             method: An HTTP method: POST, GET, PUT, or DELETE.
             endpoint: The base of the URL to register.
+            requires_authn: If True (default), requires a valid session cookie
+                when calling the API.
 
         Returns:
             A decorator function that will register a function it is
@@ -67,27 +73,33 @@ class _CRUDController():
 
         def decorator(function):
             spec = inspect.getfullargspec(function)
-            self._registry[method][endpoint, len(spec.args)] = (function, spec)
+            self._registry[method][endpoint, len(spec.args)] = (function,
+                                                                spec,
+                                                                requires_authn)
             return function
         return decorator
 
-    def create(self, endpoint):
+    def create(self, endpoint, requires_authn=True):
         """Registers a create endpoint."""
-        return self._register("POST", endpoint)
+        return self._register("POST", endpoint,
+                              requires_authn=requires_authn)
 
-    def retrieve(self, endpoint):
+    def retrieve(self, endpoint, requires_authn=True):
         """Registers a retrieve endoint."""
-        return self._register("GET", endpoint)
+        return self._register("GET", endpoint,
+                              requires_authn=requires_authn)
 
-    def update(self, endpoint):
+    def update(self, endpoint, requires_authn=True):
         """Registers an update endpoint."""
-        return self._register("PUT", endpoint)
+        return self._register("PUT", endpoint,
+                              requires_authn=requires_authn)
 
-    def delete(self, endpoint):
+    def delete(self, endpoint, requires_authn=True):
         """Registers a delete endpoint."""
-        return self._register("DELETE", endpoint)
+        return self._register("DELETE", endpoint,
+                              requires_authn=requires_authn)
 
-    def handle(self, method, path, data=None):
+    def handle(self, method, path, data=None, cookie=None):
         """Handle an HTTP request using the registers handler for that URL endpoint
             and parameters.
 
@@ -96,12 +108,15 @@ class _CRUDController():
             path: The URL path segment
             data: For POST and PUT (create/update) endpoints, the JSON document
                 with which to create or replace the resource.
+            cookie: An http.cookies Cookie, if the user sent one.
 
         Returns:
             A str or bytes content for the response.
 
         Raises:
             CRUDException: An error occurred accessing that resource.
+            AuthenticationException: A request was made for a secure resource
+                without a valid session token.
         """
 
         _, endpoint, *args = path.split("/")
@@ -116,6 +131,14 @@ class _CRUDController():
 
         function, spec, requires_authn = self._registry[method][endpoint, len(args)]
 
+        if cookie and "session" in cookie:
+            user = authentication.get_user_for_session(cookie["session"].value)
+        else:
+            user = None
+
+        if requires_authn and not user:
+            raise authentication.AuthenticationException("Authentication required.")
+
         # Coerce all args to the required type, if the API method function
         # has corresponding annotations.
         args = [spec.annotations.get(name, str)(arg)
@@ -125,6 +148,8 @@ class _CRUDController():
         kwargs = {}
         if "data" in spec.kwonlyargs:
             kwargs["data"] = json.loads(data)
+        if "user" in spec.kwonlyargs:
+            kwargs["user"] = user
 
         response = function(*args, **kwargs)
 
