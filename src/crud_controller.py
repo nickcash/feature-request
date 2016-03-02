@@ -9,6 +9,7 @@ Attributes:
 
 import inspect
 import json
+import urllib.parse
 
 import authentication
 
@@ -132,7 +133,12 @@ class _CRUDController():
         function, spec, requires_authn = self._registry[method][endpoint, len(args)]
 
         if cookie and "session" in cookie:
-            user = authentication.get_user_for_session(cookie["session"].value)
+            token = urllib.parse.unquote(cookie["session"].value)
+            try:
+                user = authentication.get_user_for_session(token)
+            except authentication.AuthenticationException:
+                # session is invalid
+                user = None
         else:
             user = None
 
