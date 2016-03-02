@@ -114,18 +114,19 @@ class _CRUDController():
             raise CRUDException("404 Not Found",
                                 "Unknown path '{}'".format(path))
 
-        function, spec = self._registry[method][endpoint, len(args)]
+        function, spec, requires_authn = self._registry[method][endpoint, len(args)]
 
         # Coerce all args to the required type, if the API method function
         # has corresponding annotations.
         args = [spec.annotations.get(name, str)(arg)
                 for (arg, name) in zip(args, spec.args)]
 
-        if method in {"POST", "PUT"}:
-            data = json.loads(data)
-            response = function(*args, data=data)
-        else:
-            response = function(*args)
+        # Pass data arg, if function wants it
+        kwargs = {}
+        if "data" in spec.kwonlyargs:
+            kwargs["data"] = json.loads(data)
+
+        response = function(*args, **kwargs)
 
         return json.dumps(response if response is not None else {"status": "OK"})
 
