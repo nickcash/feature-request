@@ -8,6 +8,10 @@ from crud_controller import crud
 def login(*, data):
     """Creates a user session for user with supplied username and password."""
 
+    if not data.get("username") or not data.get("password"):
+        raise authentication.AuthenticationException(
+                  "Username and password are required!")
+
     user = authentication.get_user_for_login(data["username"],
                                              data["password"])
     user["token"] = authentication.create_session_for_user(user["username"])
