@@ -57,7 +57,7 @@ class TestCRUDController(unittest.TestCase):
                          (test_api_function, function_spec, True))
 
     def test_crud_handle_json(self):
-        @crud.retrieve("test")
+        @crud.retrieve("test", requires_authn=False)
         def test_api_function(a):
             return {"foo": a}
 
@@ -65,7 +65,7 @@ class TestCRUDController(unittest.TestCase):
                          self.TEST_JSON)
 
     def test_crud_handle_data(self):
-        @crud.create("test")
+        @crud.create("test", requires_authn=False)
         def test_api_function(*, data):
             return data
 

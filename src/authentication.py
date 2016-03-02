@@ -169,4 +169,4 @@ class AuthenticationException(Exception):
         self.token = token
 
     def __str__(self):
-        return self.status
+        return self.message
