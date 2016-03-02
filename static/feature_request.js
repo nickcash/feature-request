@@ -4,32 +4,135 @@
 var ViewModel = function() {
     //Creates and binds ViewModel with Knockout
 
+    this.authenticated = ko.observable(false);
+    this.username = ko.observable();
+    this.password = ko.observable();
+    this.loginError = ko.observable();
+
     this.activeClient = ko.observable();
     this.clients = ko.observableArray([]);
     this.productAreas = ko.observableArray();
     this.productAreaMap = {};
     this.clientRequests = ko.observableArray([]);
+    this.ajaxError = ko.observable();
 
-    // Load product areas, create map by ID
-    $.getJSON("/api/product_areas", function(data) {
-        $.each(data, function(i, productArea) {
-            viewModel.productAreas.push(productArea);
-            viewModel.productAreaMap[productArea._id] = productArea;
+    this.login = function() {
+        $.ajax({
+            method: "POST",
+            url: "/api/login",
+
+            data: ko.toJSON({
+                "username": this.username(),
+                "password": this.password()
+            }),
+
+            success: function(data, status) {
+                $.cookie("session", data["token"]);
+                viewModel.loadData();
+                viewModel.authenticated(true);
+            },
+
+            error: function(jqXHR, status, error) {
+                if(jqXHR.responseJSON && jqXHR.responseJSON["message"]) {
+                    viewModel.loginError(jqXHR.responseJSON["message"]);
+                }
+                else {
+                    viewModel.loginError("An error occurred logging in.");
+                }
+                $("#login-form")[0].reset();
+            }
+        })
+    };
+
+    this.logout = function() {
+        $.ajax({
+            method: "POST",
+            url: "/api/logout",
+             success: function(data, status) {
+                 $.removeCookie("session");
+                 window.location.reload();
+             },
+             error: displayAJAXErrors
         });
-    });
+    };
 
-    // Load available clients
-    $.getJSON("/api/clients", function(data) {
-        selectClient(data[0]);
-        $.each(data, function(i, client) {
-            client.isSelected = ko.observable(false);
-            viewModel.clients.push(client);
-        });
-    });
+    this.loadData = function() {
+       //Load all product areas
+        $.ajax({
+            url: "/api/product_areas",
+            success: function(data) {
+                $.each(data, function(i, productArea) {
+                    viewModel.productAreas.push(productArea);
+                    viewModel.productAreaMap[productArea._id] = productArea;
+                });
+            },
+            error: displayAJAXErrors
+        })
 
+        // Load available clients
+        $.ajax({
+            url: "/api/clients",
+            success: function(data) {
+                if(data.length) {
+                    selectClient(data[0]);
+                }
+                else{
+                    $("#main").show();
+                    viewModel.ajaxError("No clients available!");
+                }
+                $.each(data, function(i, client) {
+                    client.isSelected = ko.observable(false);
+                    viewModel.clients.push(client);
+                });
+            },
+            error: displayAJAXErrors
+        })
+    };
+
+
+    // Prepare page, body is still hidden at this point
     ko.applyBindings(this);
+
+
+    // Check if user has a session cookie
+    if($.cookie("session")) {
+        // If so, see if it's already valid
+        $.ajax({
+            method: "GET",
+            url: "/api/check_session",
+             success: function(data, status) {
+                 viewModel.authenticated(true);
+                 viewModel.loadData();
+             },
+             error: function(jqXHR, status, error) {
+                 $.removeCookie("session");
+             },
+             complete: function(jqXHR, status) {
+                 $("body").show();
+             }
+        });
+
+    }
+    else {
+        // Otherwise display login page
+        $("body").show();
+    }
 };
 var viewModel = new ViewModel();
+
+
+/**
+ * Global error handler
+ */
+var displayAJAXErrors  =function(jqXHR, status, error) {
+    $("#main").show();
+    if(jqXHR.responseJSON && jqXHR.responseJSON["message"]) {
+        viewModel.ajaxError(jqXHR.responseJSON["message"]);
+    }
+    else {
+        viewModel.ajaxError("An error occurred.");
+    }
+};
 
 
 /**
@@ -61,12 +164,13 @@ var FeatureRequest = function(request, index) {
         this.client_priority(priority);
         if (this._id()) {
             $.ajax({
-                type: "PUT",
+                method: "PUT",
                 url: "/api/feature_requests_priority/" + this._id(),
                 data: ko.toJSON({
                     _id: this._id(),
                     client_priority: priority
-                })
+                }),
+                error: displayAJAXErrors
             })
         }
     }
@@ -78,20 +182,22 @@ var FeatureRequest = function(request, index) {
             // Request is new, issue a POST request to create
             var savedRequest = this;
             $.ajax({
-                type: "POST",
+                method: "POST",
                 url: "/api/feature_requests",
                 data: ko.toJSON(this),
                 success: function(data, status) {
                     savedRequest._id(data._id);
-                }
+                },
+                error: displayAJAXErrors
             })
         }
         else {
             // Issue exists, issue a PUT to update
             $.ajax({
-                type: "PUT",
+                method: "PUT",
                 url: "/api/feature_requests/" + this._id(),
-                data: ko.toJSON(this)
+                data: ko.toJSON(this),
+                error: displayAJAXErrors
             })
         }
 
@@ -132,8 +238,9 @@ var FeatureRequest = function(request, index) {
         );
         if (this._id()) {
             $.ajax({
-                type: "DELETE",
-                url: "/api/feature_requests/" + this._id()
+                method: "DELETE",
+                url: "/api/feature_requests/" + this._id(),
+                error: displayAJAXErrors
             });
         }
         reindexPriorities();
@@ -156,14 +263,18 @@ var selectClient = function(client, event) {
     // Select a client and load its feature requests
     viewModel.activeClient(client);
 
-    $.getJSON("/api/feature_requests/" + client._id, function(data) {
-        viewModel.clientRequests.removeAll();
-        $.each(data, function(i, request) {
-            viewModel.clientRequests.push(
-                new FeatureRequest(request, i)
-            );
-        });
-        $("#main").show();
+    $.ajax({
+        url: "/api/feature_requests/" + client._id,
+        success: function(data, status){
+            viewModel.clientRequests.removeAll();
+            $.each(data, function(i, request) {
+                viewModel.clientRequests.push(
+                    new FeatureRequest(request, i)
+                );
+            });
+            $("#main").show();
+        },
+        error: displayAJAXErrors
     });
 };
 
